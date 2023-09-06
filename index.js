@@ -16,8 +16,9 @@ let tabla = document.querySelector(".table tbody");
 //Inputs
 let buscarInput = document.querySelector(".buscar-input");
 
-let productoSeleccionadoIndex = null;
+//Variables
 let productosKey = "productos";
+let productoSeleccionadoIndex = null;
 let productos = getLocalStorage();
 
 //Functions
@@ -141,12 +142,10 @@ function eliminarProducto(index) {
 }
 
 function buscarProducto() {
-  let textoBuscado = buscarInput.value.toLowerCase().trim();
-
   limpiarTabla();
 
   productos.forEach((producto, i) => {
-    if (producto.nombre.toLowerCase().includes(textoBuscado)) {
+    if (producto.nombre.toLowerCase().includes(buscarInput.value.toLowerCase().trim())) {
       let fila = document.createElement("tr");
       fila.innerHTML = `
                 <td>${i + 1}</td>
