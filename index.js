@@ -1,87 +1,165 @@
-// a=["Alejo", "asdasd", "wwww", "aaaaa"]
-// b={
-//     nombre:'Alejo',
-//     cargo:"Operario",
-//     salario:4500000
-// }
+// Variables globales
 
-// localStorage.setItem('usuario',JSON.stringify(b))
+//Fields
+let nombre = document.querySelector("#nombre-pro");
+let presentacion = document.querySelector("#presentacion-pro");
+let precio = document.querySelector("#precio-pro");
+let imagen = document.querySelector("#imagen-pro");
 
-// local=JSON.parse(localStorage.getItem('usuario'))
-// console.log(local)
+//Bottons
+let btnSave = document.querySelector(".btn-guardar");
+let btnUpdate = document.querySelector(".btn-actualizar");
 
-// b=[
-//     {
-//         nombre:'Alejo',
-//         cargo:"Operario",
-//         salario:4500000
-//     },
-//     {
-//         nombre:'Carlos',
-//         cargo:"Web ui",
-//         salario:400000
-//     },
-//     {
-//         nombre:'Juan',
-//         cargo:"dev",
-//         salario:50000
-//     }
+//Table
+let tabla = document.querySelector(".table tbody");
 
-// ]
+//Inputs
+let buscarInput = document.querySelector(".buscar-input");
 
-// localStorage.setItem('Users',JSON.stringify(b))
+let productoSeleccionadoIndex = null;
+let productosKey = "productos";
+let productos = getLocalStorage();
 
-// local = JSON.parse(localStorage.getItem('Users'))
-
-// local.forEach(dato => {
-//     document.write(`Nombre: ${dato.nombre} -- Cargo: ${dato.cargo} -- Salario: ${dato.salario}<br>`)
-//     console.log(dato)
-// });
-class producto {
-    constructor(name, presentation, price, img){
-        this.name=name
-        this.presentation=presentation
-        this.price=price
-        this.img=img
-    }
+//Functions
+function getLocalStorage() {
+  return JSON.parse(localStorage.getItem(productosKey)) || [];
 }
 
-const d=document
+document.addEventListener("DOMContentLoaded", function () {
+  showData();
+  btnSave.addEventListener("click", guardarProducto);
+  btnUpdate.addEventListener("click", actualizarProducto);
+});
 
-let form = d.querySelector('.form')
+function getData() {
+  if (
+    nombre.value.trim() === "" ||
+    presentacion.value.trim() === "" ||
+    precio.value.trim() === "" ||
+    imagen.value.trim() === ""
+  ) {
+    alert("Debes completar todos los campos.");
+    return null;
+  }
 
-let nombre = d.querySelector('.name-pro')
-let presentation = d.querySelector('.presentation-pro')
-let price = d.querySelector('.price-pro')
-let img = d.querySelector('.image-pro')
-let btnSave = d.querySelector('.btnSave')
+  return {
+    nombre: nombre.value,
+    presentacion: presentacion.value,
+    precio: precio.value,
+    imagen: imagen.value,
+  };
+}
 
-btnSave.addEventListener("click", function(){
-    if (
-        nombre.value=="" ||
-        presentation.value=="" ||
-        price.value==""
-    ) {
-        alert("vacio")
-    } 
-    else {
-        let product=new producto(nombre.value,presentation.value,price.value,img.value)
-        alert(product)
-        localSave(product)
+function guardarProducto() {
+  const datos = getData();
+  if (!datos) return;
+
+  productos.push(datos);
+  guardarProductos(productos);
+
+  cleanFields();
+  showData();
+  alert("Products saved");
+}
+
+function guardarProductos(productos) {
+  localStorage.setItem(productosKey, JSON.stringify(productos));
+}
+
+function showData() {
+  limpiarTabla();
+
+  productos.forEach((producto, i) => {
+    let fila = document.createElement("tr");
+    fila.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${producto.nombre}</td>
+            <td>${producto.presentacion}</td>
+            <td>${producto.precio}</td>
+            <td><img src="${producto.imagen}" width="20%"></td>
+            <td>
+                <button class="btn btn-warning" onclick="editarProducto(${i})">Editar</button>
+                <button class="btn btn-danger" onclick="eliminarProducto(${i})">Eliminar</button>
+            </td>
+        `;
+    tabla.appendChild(fila);
+  });
+}
+
+function limpiarTabla() {
+  tabla.innerHTML = "";
+}
+
+function cleanFields() {
+  nombre.value = "";
+  presentacion.value = "";
+  precio.value = "";
+  imagen.value = "";
+}
+
+function editarProducto(index) {
+  let producto = productos[index];
+
+  nombre.value = producto.nombre;
+  presentacion.value = producto.presentacion;
+  precio.value = producto.precio;
+  imagen.value = producto.imagen;
+
+  btnSave.classList.add("d-none");
+  btnUpdate.classList.remove("d-none");
+  productoSeleccionadoIndex = index;
+}
+
+function actualizarProducto() {
+  if (productoSeleccionadoIndex !== null) {
+    productos[productoSeleccionadoIndex] = {
+      nombre: nombre.value,
+      presentacion: presentacion.value,
+      precio: precio.value,
+      imagen: imagen.value,
+    };
+
+    guardarProductos(productos);
+    cleanFields();
+    showData();
+
+    btnSave.classList.remove("d-none");
+    btnUpdate.classList.add("d-none");
+    productoSeleccionadoIndex = null;
+  }
+}
+
+function eliminarProducto(index) {
+  let confirmar = confirm(
+    "¿Estás seguro de que deseas eliminar este producto?"
+  );
+  if (confirmar) {
+    productos.splice(index, 1);
+    guardarProductos(productos);
+    showData();
+  }
+}
+
+function buscarProducto() {
+  let textoBuscado = buscarInput.value.toLowerCase().trim();
+
+  limpiarTabla();
+
+  productos.forEach((producto, i) => {
+    if (producto.nombre.toLowerCase().includes(textoBuscado)) {
+      let fila = document.createElement("tr");
+      fila.innerHTML = `
+                <td>${i + 1}</td>
+                <td>${producto.nombre}</td>
+                <td>${producto.presentacion}</td>
+                <td>${producto.precio}</td>
+                <td><img src="${producto.imagen}" width="20%"></td>
+                <td>
+                    <button class="btn btn-warning" onclick="editarProducto(${i})">Editar</button>
+                    <button class="btn btn-danger" onclick="eliminarProducto(${i})">Eliminar</button>
+                </td>
+            `;
+      tabla.appendChild(fila);
     }
-    
-})
-
-function localSave(Object) {
-    let productos=[]
-    let saved = JSON.parse(localStorage.getItem('Products'))
-    alert(!!saved)
-    if (!!saved) {
-        productos=saved
-    }
-
-    productos.push(Object)
-    localStorage.setItem('Products', productos)
-
-    alert(JSON.parse(localStorage.getItem('Products')))
+  });
 }
