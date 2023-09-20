@@ -1,3 +1,4 @@
+
 // Variables globales
 
 //Fields
@@ -17,6 +18,7 @@ let tabla = document.querySelector(".table tbody");
 let buscarInput = document.querySelector(".buscar-input");
 
 //Variables
+let pdfs
 let productosKey = "productos";
 let productoSeleccionadoIndex = null;
 let productos = getLocalStorage();
@@ -61,6 +63,7 @@ function guardarProducto() {
   cleanFields();
   showData();
   alert("Products saved");
+  pdfGenerator()
 }
 
 function guardarProductos(productos) {
@@ -69,6 +72,7 @@ function guardarProductos(productos) {
 
 function showData() {
   limpiarTabla();
+  pdfs=""
 
   productos.forEach((producto, i) => {
     let fila = document.createElement("tr");
@@ -83,6 +87,7 @@ function showData() {
                 <button class="btn btn-danger" onclick="eliminarProducto(${i})">Eliminar</button>
             </td>
         `;
+    pdfs= pdfs + `Nombre: ${producto.nombre} --- Presentacion: ${producto.presentacion} --- Precio: ${producto.precio}\n`
     tabla.appendChild(fila);
   });
 }
@@ -161,4 +166,12 @@ function buscarProducto() {
       tabla.appendChild(fila);
     }
   });
+}
+
+function pdfGenerator() {
+  const doc = new jsPDF()
+  doc.text(pdfs, 10, 10)
+  console.log(doc.text(pdfs, 10, 10))
+  console.log(pdfs)
+  doc.save('lista.pdf')
 }
